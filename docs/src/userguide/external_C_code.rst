@@ -17,7 +17,7 @@ to be less frequent, but you might want to do it, for example, if you are
 Cython module can be used as a bridge to allow Python code to call C code, it
 can also be used to allow C code to call Python code.
 
-.. _embedding Python: http://www.freenet.org.nz/python/embeddingpyrex/
+.. _embedding Python: https://web.archive.org/web/20120225082358/http://www.freenet.org.nz:80/python/embeddingpyrex/
 
 External declarations
 =======================
@@ -335,7 +335,7 @@ Including verbatim C code
 For advanced use cases, Cython allows you to directly write C code
 as "docstring" of a ``cdef extern from`` block:
 
-.. literalinclude:: ../../examples/userguide/external_C_code/c_code_docstring.pyx
+.. literalinclude:: ../../examples/userguide/external_C_code/verbatim_c_code.pyx
 
 The above is essentially equivalent to having the C code in a file
 ``header.h`` and writing ::
@@ -343,6 +343,11 @@ The above is essentially equivalent to having the C code in a file
     cdef extern from "header.h":
         long square(long x)
         void assign(long& x, long y)
+
+This feature is commonly used for platform specific adaptations at
+compile time, for example:
+
+.. literalinclude:: ../../examples/userguide/external_C_code/platform_adaptation.pyx
 
 It is also possible to combine a header file and verbatim C code::
 
@@ -549,13 +554,17 @@ You can release the GIL around a section of code using the
     with nogil:
         <code to be executed with the GIL released>
 
-Code in the body of the with-statement must not raise exceptions or
-manipulate Python objects in any way, and must not call anything that
-manipulates Python objects without first re-acquiring the GIL.  Cython
-validates these operations at compile time, but cannot look into
-external C functions, for example.  They must be correctly declared
-as requiring or not requiring the GIL (see below) in order to make
+Code in the body of the with-statement must not manipulate Python objects
+in any way, and must not call anything that manipulates Python objects without
+first re-acquiring the GIL.  Cython validates these operations at compile time,
+but cannot look into external C functions, for example.  They must be correctly
+declared as requiring or not requiring the GIL (see below) in order to make
 Cython's checks effective.
+
+Since Cython 3.0, some simple Python statements can be used inside of ``nogil``
+sections: ``raise``, ``assert`` and ``print`` (the Py2 statement, not the function).
+Since they tend to be lone Python statements, Cython will automatically acquire
+and release the GIL around them for convenience.
 
 .. _gil:
 
